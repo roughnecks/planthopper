@@ -4,12 +4,12 @@ planthopper
 planthopper is a Perl IRC Application which can be used to post content over a Tumblr
 log directly from your IRC client.
 
-I've started developing Tumblrbot in agreement with some IRCers i chat with.
+I've started developing planthopper in agreement with some IRCers i chat with.
 Mostly of the code was taken from BirbaBot (https://github.com/roughnecks/BirbaBot),
 while other parts of it was discovered on the net: i just used some glue to make the 
 pieces work together.
 
-If you want to try Tumblrbot, you need to authorize it as an application for your
+If you want to try planthopper, you need to authorize it as an application for your
 tumblrlog. Once the app has been authorized you'll have to edit the bot configuration 
 file and fill in some informations, which should be kept privately.
 
