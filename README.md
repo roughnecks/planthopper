@@ -1,7 +1,7 @@
 planthopper
 ===========
 
-Tumblrbot is a Perl IRC Application which can be used to post content over a Tumblr
+planthopper is a Perl IRC Application which can be used to post content over a Tumblr
 log directly from your IRC client.
 
 I've started developing Tumblrbot in agreement with some IRCers i chat with.
