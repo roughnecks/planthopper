@@ -1,0 +1,25 @@
+Required perl modules to apt-get
+
+libpoe-component-irc-perl		POE::Component::IRC | POE::Component::IRC::Common
+libpoe-component-sslify-perl		POE::Component::SSLify
+libpoe-component-client-dns-perl	POE::Component::Client::DNS
+libcrypt-ssleay-perl			Net::SSLeay
+libyaml-perl				YAML::Any
+libhtml-parser-perl			HTML::Entities
+libsocket6-perl				Socket6 ## with perl >= 5.14 this module is not needed
+libnet-oauth-perl			Net::OAuth
+libwww-perl				HTTP::Request::Common | LWP::Simple | LWP::UserAgent
+libjson-perl				JSON
+
+Copy files/example.conf to some_file.conf in the bot root directory and modify it.
+cp files/example.conf bot.conf ; nano bot.conf
+
+If you don't need console output start the bot with: 
+./restart.bot.sh bot.conf ## <<< This one also provides logging function
+
+If you would like to see output in console window, start the bot with:
+./tumblrbot.pl bot.conf
+
+If you want to use cron to check if the bot crashed/stopped and reload it automatically use "restart.bot.sh"; cron example:
+
+5,20,35,50 * * * * /home/user/tumblrbot/restart.bot.sh /home/user/tumblrbot/bot.conf
