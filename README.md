@@ -23,7 +23,7 @@ for the bot to operate.
 Copypaste those codes in a safe place and fill in the last 3 parameters in the bot 
 configuration file.
 
-Congrats! You should now be ready to use Tumblrbot!
+Congrats! You should now be ready to use planthopper!
 
 Many thanks go to all the people who contributed in any way, directly and indirectly,
 while my special hugs are for melmothX (who introduced me to the world of Perl) and 
