@@ -10,7 +10,7 @@ while other parts of it was discovered on the net: i just used some glue to make
 pieces work together.
 
 If you want to try planthopper, you need to authorize it as an application for your
-tumblrlog. Once the app has been authorized you'll have to edit the bot configuration 
+tumblelog. Once the app has been authorized you'll have to edit the bot configuration 
 file and fill in some informations, which should be kept privately.
 
 First of all connect with your browser to https://laltromondo.dynalias.net/planthopper/

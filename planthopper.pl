@@ -73,7 +73,7 @@ my %botconfig = (
 my %tumblrconfig = (
 		    'token' => undef,
 		    'secret' => undef,
-		    'tumblrlog' => undef
+		    'tumblelog' => undef
 		   );
 
 my %apikey = (
@@ -97,12 +97,12 @@ my $apikey = LoadFile("$cwd/files/.apikey.conf");
 override_defaults(\%apikey, $apikey);
 my $c_key = $apikey{'c_key'};
 my $c_secret = $apikey{'c_secret'};
-my $tumblrlog = $tumblrconfig{'tumblrlog'};
+my $tumblelog = $tumblrconfig{'tumblelog'};
 my $token = $tumblrconfig{'token'};
 my $secret = $tumblrconfig{'secret'};
-my $posturl = 'http://api.tumblr.com/v2/blog/' . $tumblrlog . '/post';
+my $posturl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post';
 
-warn_and_quit() unless ($token && $secret && $tumblrlog);
+warn_and_quit() unless ($token && $secret && $tumblelog);
 
 my %oauth_api_params =
     ('consumer_key' =>
@@ -686,8 +686,8 @@ sub post {
     my $r = decode_json($response->content);
     if($r->{'meta'}{'status'} == 201) {
       my $item_id = $r->{'response'}{'id'};
-      print("Added a Tumblr entry, http://$tumblrlog/post/$item_id \n");
-      return "Content posted to tumblrlog.";
+      print("Added a Tumblr entry, http://$tumblelog/post/$item_id \n");
+      return "Content posted to tumblelog.";
     } else {
       printf("Cannot create Tumblr entry: %s\n",
 	     $r->{'meta'}{'msg'});
