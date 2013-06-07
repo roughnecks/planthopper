@@ -10,16 +10,17 @@ if [ ! -d "$botdir/logs" ]; then
 	mkdir -p "$botdir/logs"
 fi
 
-logfile=$botdir/logs/tumblr.log
+logfile=$botdir/logs/ph.log
 
 cd $botdir || exit 2
 
-# the bot never started, as there is no tumblr.pid, so append to logfile
-if [ ! -f "$botdir/tumblr.pid" ]; then
-    exec nohup perl tumblrbot.pl $1 >> "$logfile" 2>&1 &
+# the bot never started, as there is no ph.pid, so append to logfile
+if [ ! -f "$botdir/ph.pid" ]; then
+    exec nohup perl planthopper.pl $1 >> "$logfile" 2>&1 &
+    exit
 fi
 
-pid=$(cat $botdir/tumblr.pid)
+pid=$(cat $botdir/ph.pid)
 
 if kill -0 $pid > /dev/null 2>&1 ; then
     exit
@@ -33,7 +34,7 @@ fi
 
 echo -n $(date) >> "$logfile"
 echo "Bot restarted by $0" >> "$logfile"
-exec nohup perl tumblrbot.pl $1 >> "$logfile" 2>&1 &
+exec nohup perl planthopper.pl $1 >> "$logfile" 2>&1 &
 
 
 

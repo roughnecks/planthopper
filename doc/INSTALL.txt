@@ -18,8 +18,8 @@ If you don't need console output start the bot with:
 ./restart.bot.sh bot.conf ## <<< This one also provides logging function
 
 If you would like to see output in console window, start the bot with:
-./tumblrbot.pl bot.conf
+./planthopper.pl bot.conf
 
 If you want to use cron to check if the bot crashed/stopped and reload it automatically use "restart.bot.sh"; cron example:
 
-5,20,35,50 * * * * /home/user/tumblrbot/restart.bot.sh /home/user/tumblrbot/bot.conf
+5,20,35,50 * * * * /home/user/planthopper/restart.bot.sh /home/user/planthopper/bot.conf
