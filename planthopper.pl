@@ -188,7 +188,7 @@ sub _start {
 								Ignore_unknown => 1
 							       ));
   $irc->plugin_add( 'CTCP' => POE::Component::IRC::Plugin::CTCP->new(
-								     version => "planthopper IRC Perl Bot v.$VERSION",
+								     version => "planthopper IRC Perl Bot v$VERSION - https://github.com/roughnecks/planthopper",
 								     userinfo => $ircname,
 								    ));
   $irc->yield( register => 'all' );
