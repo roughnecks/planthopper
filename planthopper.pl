@@ -717,7 +717,7 @@ sub ltrim {
 
 sub irc_botcmd_version {
   my $where = $_[ARG1];
-  bot_says($where, "planthopper v." . "$VERSION" . ", IRC Perl Bot.");
+  bot_says($where, "planthopper v" . "$VERSION" . ", IRC Perl Bot - https://github.com/roughnecks/planthopper");
   return;
 }
 
