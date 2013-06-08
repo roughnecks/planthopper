@@ -676,7 +676,7 @@ sub irc_botcmd_audio {
 
 
 sub post {
-  my$request = shift;
+  my $request = shift;
   $request->sign;
   
   my $ua = LWP::UserAgent->new;
