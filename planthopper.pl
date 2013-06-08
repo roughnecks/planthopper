@@ -170,14 +170,14 @@ sub _start {
   $irc->plugin_add('BotCommand', 
 		   POE::Component::IRC::Plugin::BotCommand->new(
 								Commands => {		    
-									     restart => 'Restart Tumblr Bot',
-									     text => 'Tumblr text post: (text <content> <[tag tag tag]> title)',
+									     restart => 'Restart planthopper',
+									     text => 'Tumblr text post: (text <content> <[tag tag tag]> title) - Title is not mandatory',
 									     quote => 'Tumblr quote post: (quote <content> <[source]>)',
-									     photo => 'Tumblr photo post: (photo <img url> <[tag tag tag]> title) - Supported formats: jpeg,jpg,png,bmp,gif,webp,svg.',
-									     link => 'Tumblr link post: (link <url> <[title]> description)',
-									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it.',
+									     photo => 'Tumblr photo post: (photo <img url> <[tag tag tag]> title) - Supported formats: jpeg,jpg,png,bmp,gif,webp,svg. Title is not mandatory',
+									     link => 'Tumblr link post: (link <url> <[title]> description) - Description is not mandatory',
+									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
-									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3.',
+									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
 									     version => 'Shows our version and info'
 									    },
 								In_channels => 1,
