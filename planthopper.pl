@@ -155,6 +155,7 @@ POE::Session->create(
 						     irc_botcmd_video
 						     irc_botcmd_chat
 						     irc_botcmd_audio
+						     irc_botcmd_git
 						     irc_botcmd_restart
 						     irc_botcmd_version
 						     greetings_and_die
@@ -178,7 +179,8 @@ sub _start {
 									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
-									     version => 'Shows our version and info'
+									     version => 'Shows our version and info',
+									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
 								In_channels => 1,
 								Auth_sub => \&check_if_fucker,
@@ -719,6 +721,51 @@ sub irc_botcmd_version {
   my $where = $_[ARG1];
   bot_says($where, "planthopper v" . "$VERSION" . ", IRC Perl Bot - https://github.com/roughnecks/planthopper");
   return;
+}
+
+sub irc_botcmd_git {
+  my ($who, $where, $arg) = @_[ARG0, ARG1, ARG2];
+  return unless check_if_admin($who);
+  return unless $arg;
+  if ($arg eq 'pull') { 
+    my $gitorigin = `git config --get remote.origin.url`;
+    if ($gitorigin =~ m!^\s*ssh://!) {
+      bot_says($where, "Your git uses ssh, I can't safely pull");
+      return;
+    }
+    die "Can't fork: $!" unless defined(my $pid = open(KID, "-|"));
+    if ($pid) {           # parent
+      while (<KID>) {
+	bot_says($where, $_);
+      }
+      close KID;
+      return;
+    } else {
+      my @command = ("git", "pull");
+      # this is the external process, forking. It never returns
+      exec @command or die "Can't exec git: $!";
+    }
+    return;
+  } elsif ($arg eq 'version') {
+    die "Can't fork: $!" unless defined(my $pid = open(KID, "-|"));
+    if ($pid) { # parent
+      while (<KID>) {
+	my $line = $_;
+	unless ($line =~ m/^\s*$/) {
+	  bot_says($where, $line);
+	}
+      }
+      close KID;
+      return;
+    } else {
+      # this is the external process, forking. It never returns
+      my @command = ('git', 'log', '-n', '1');
+      exec @command or die "Can't exec git: $!";
+    }
+  } else {
+    bot_says($where, "git command accepts only 'pull' and 'version' subcommands");
+    return;
+  }
 }
 
 
