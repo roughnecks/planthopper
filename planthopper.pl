@@ -39,7 +39,7 @@ use JSON;
 our $VERSION = '0.1';
 
 my $lastpinged;
-my $reconnect_delay = 150;
+my $reconnect_delay = 80;
 my $starttime = time;
 my $bbold = "\x{0002}";
 my $ebold = "\x{000F}";
