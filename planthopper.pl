@@ -175,7 +175,7 @@ sub _start {
 									     text => 'Tumblr text post: (text <content> <[tag tag tag]> title) - Title is not mandatory',
 									     quote => 'Tumblr quote post: (quote <content> <[source]>)',
 									     photo => 'Tumblr photo post: (photo <img url> <[tag tag tag]> title) - Supported formats: jpeg,jpg,png,bmp,gif,webp,svg. Title is not mandatory',
-									     link => 'Tumblr link post: (link <url> <[title]> description) - Description is not mandatory',
+									     link => 'Tumblr link post: (link <url> <[tag tag tag]> <title>) - Title is mandatory',
 									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
@@ -420,6 +420,7 @@ sub irc_botcmd_text {
     print Dumper($title);
 
     utf8::decode($string);
+    utf8::decode($tags);
     utf8::decode($title);
     my $request =
       Net::OAuth->request("protected resource")->new
@@ -520,20 +521,20 @@ sub irc_botcmd_link {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(https?:\/\/.+)\s+\[(.+)\](.+)?$/) {
+  if ($what =~ m/^(https?:\/\/.+)\s+\[(.+)\](.+)$/) {
     
-    my $description;
     my $link = $1;
-    my $title = trim($2);
-    $description = trim($3) if ($3);
+    my $tags = trim($2);
+    my $title = trim($3);
+    $tags =~ s/\s+/,/g;
 
     print Dumper($link);
+    print Dumper($tags);
     print Dumper($title);
-    print Dumper($description);
 
     utf8::decode($link);
+    utf8::decode($tags);
     utf8::decode($title);
-    utf8::decode($description);
 
     my $request =
       Net::OAuth->request("protected resource")->new
@@ -544,8 +545,8 @@ sub irc_botcmd_link {
 	   extra_params => {
 			    'type' => 'link',
 			    'url' => "$link",
-			    'title' => "$title",
-			    'description' => "$description"
+			    'tags' => "$tags",
+			    'title' => "$title"
 			   });
     
     bot_says($channel, post($request));
