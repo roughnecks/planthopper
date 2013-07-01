@@ -101,6 +101,7 @@ my $tumblelog = $tumblrconfig{'tumblelog'};
 my $token = $tumblrconfig{'token'};
 my $secret = $tumblrconfig{'secret'};
 my $posturl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post';
+my $delurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post/delete';
 
 warn_and_quit() unless ($token && $secret && $tumblelog);
 
@@ -155,6 +156,7 @@ POE::Session->create(
 						     irc_botcmd_video
 						     irc_botcmd_chat
 						     irc_botcmd_audio
+						     irc_botcmd_delete
 						     irc_botcmd_git
 						     irc_botcmd_restart
 						     irc_botcmd_version
@@ -179,6 +181,7 @@ sub _start {
 									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
+									     delete => 'Tumblr post deletion: (delete <id>)',
 									     version => 'Shows our version and info',
 									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
@@ -677,6 +680,33 @@ sub irc_botcmd_audio {
   }
 }
 
+sub irc_botcmd_delete {
+  my ($who, $channel, $what) = @_[ARG0..$#_];                          
+  my $nick = parse_user($who);                                         
+  return unless is_where_a_channel($channel);                          
+  return unless (check_if_op($channel, $nick) || check_if_admin($who));
+
+  if ($what =~ m/^\s*(\d+)\s*$/) {
+
+    my $id = trim($1);
+    utf8::decode($id);
+  
+    my $request =                                         
+      Net::OAuth->request("protected resource")->new      
+          (request_url => $delurl,                       
+           %oauth_api_params,                             
+           timestamp => time(),                           
+           nonce => rand(1000000),                        
+           extra_params => {                              
+                            'id' => "$id"            
+                           });                            
+  
+  bot_says($channel, del($request));
+  } else {                                                
+    bot_says($channel, "Invalid format: try help delete.");
+    return;                                               
+  }                                                       
+}
 
 sub post {
   my $request = shift;
@@ -690,7 +720,7 @@ sub post {
     if($r->{'meta'}{'status'} == 201) {
       my $item_id = $r->{'response'}{'id'};
       print("Added a Tumblr entry, http://$tumblelog/post/$item_id \n");
-      return "Content posted to tumblelog.";
+      return "Content posted to tumblelog with id \"$item_id\".";
     } else {
       printf("Cannot create Tumblr entry: %s\n",
 	     $r->{'meta'}{'msg'});
@@ -702,6 +732,31 @@ sub post {
     return "We failed. Check logs";
   }
 }
+
+sub del {
+  my $request = shift;
+  $request->sign;
+  
+  my $ua = LWP::UserAgent->new;
+  my $response = $ua->request(POST $delurl, Content => $request->to_post_body);
+  
+  if ( $response->is_success ) {
+    my $r = decode_json($response->content);
+    if($r->{'meta'}{'status'} == 200) {
+      print("Removed a Tumblr entry\n");
+      return "Content deleted from tumblelog.";
+    } else {
+      printf("We failed: %s\n",
+	     $r->{'meta'}{'msg'});
+      return "We failed. Check logs";
+    }            
+  } else {
+    printf("We failed: %s\n",
+	   $response->as_string);
+    return "We failed. Check logs";
+  }
+}
+
 
 #trim leading and trailing whitespaces
 sub trim {
