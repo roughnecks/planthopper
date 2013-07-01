@@ -102,6 +102,8 @@ my $token = $tumblrconfig{'token'};
 my $secret = $tumblrconfig{'secret'};
 my $posturl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post';
 my $delurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post/delete';
+my $retrieveurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/posts';
+my $reblogurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post/reblog';
 
 warn_and_quit() unless ($token && $secret && $tumblelog);
 
@@ -157,6 +159,7 @@ POE::Session->create(
 						     irc_botcmd_chat
 						     irc_botcmd_audio
 						     irc_botcmd_delete
+						     irc_botcmd_reblog
 						     irc_botcmd_git
 						     irc_botcmd_restart
 						     irc_botcmd_version
@@ -181,7 +184,8 @@ sub _start {
 									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
-									     delete => 'Tumblr post deletion: (delete <id>)',
+									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
+									     reblog => 'Tumblr post reblog: (reblog <id>) -- "id" is a specific post ID',
 									     version => 'Shows our version and info',
 									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
@@ -605,7 +609,7 @@ sub irc_botcmd_chat {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{2,15}\>\s+.+\s*\--\s*\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{2,15}\>\s+.+)+\s*$/i) {
+  if ($what =~ m/^(\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{1,15}\>\s+.+\s*\--\s*\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{1,15}\>\s+.+)+\s*$/i) {
 
     print Dumper(\$1);
     my $string = $1;
@@ -708,6 +712,41 @@ sub irc_botcmd_delete {
   }                                                       
 }
 
+sub irc_botcmd_reblog {
+  my ($who, $channel, $what) = @_[ARG0..$#_];                          
+  my $nick = parse_user($who);                                         
+  return unless is_where_a_channel($channel);                          
+  return unless (check_if_op($channel, $nick) || check_if_admin($who));
+  if ($what =~ m/^\s*(\d+)\s*$/) {
+    my $id = trim($1);
+    utf8::decode($id);
+
+    $retrieveurl .= "\/\?api_key\=$c_key\&id\=$id";
+
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->get( $retrieveurl );
+    if ( $response->is_success ) {  
+      my $r = decode_json($response->content);
+      if($r->{'meta'}{'status'} == 200) {
+	my $reblog_key = $r->{'response'}{'posts'}[0]{'reblog_key'};
+	print "Our key is: $reblog_key\n";
+
+	my $request = Net::OAuth->request("protected resource")->new     
+          (request_url => $reblogurl,                      
+           %oauth_api_params,                            
+           timestamp => time(),                          
+           nonce => rand(1000000),                       
+           extra_params => {               
+                            'id' => "$id",
+                            'reblog_key' => "$reblog_key"
+                           });                           
+	
+	bot_says($channel, reblog($request));
+      } else { printf("Bad meta status: %s\n", $r->{'meta'}{'msg'}); }
+    } else { print "Bad response from LWP\n"; }
+  } else { bot_says($channel, "Invalid format: try help reblog."); }
+}
+
 sub post {
   my $request = shift;
   $request->sign;
@@ -745,6 +784,30 @@ sub del {
     if($r->{'meta'}{'status'} == 200) {
       print("Removed a Tumblr entry\n");
       return "Content deleted from tumblelog.";
+    } else {
+      printf("We failed: %s\n",
+	     $r->{'meta'}{'msg'});
+      return "We failed. Check logs";
+    }            
+  } else {
+    printf("We failed: %s\n",
+	   $response->as_string);
+    return "We failed. Check logs";
+  }
+}
+
+sub reblog {
+  my $request = shift;
+  $request->sign;
+  
+  my $ua = LWP::UserAgent->new;
+  my $response = $ua->request(POST $reblogurl, Content => $request->to_post_body);
+  
+  if ( $response->is_success ) {
+    my $r = decode_json($response->content);
+    if($r->{'meta'}{'status'} == 201) {
+      print("Successfully reblogged entry\n");
+      return "Content reblogged to tumblelog.";
     } else {
       printf("We failed: %s\n",
 	     $r->{'meta'}{'msg'});
