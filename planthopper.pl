@@ -810,8 +810,9 @@ sub reblog {
   if ( $response->is_success ) {
     my $r = decode_json($response->content);
     if($r->{'meta'}{'status'} == 201) {
+      my $item_id = $r->{'response'}{'id'};
       print("Successfully reblogged entry\n");
-      return "Content reblogged to tumblelog.";
+      return "Content reblogged to tumblelog. http:\/\/$tumblelog\/$item_id";
     } else {
       printf("We failed: %s\n",
 	     $r->{'meta'}{'msg'});
