@@ -179,13 +179,13 @@ sub _start {
 									     restart => 'Restart planthopper',
 									     text => 'Tumblr text post: (text <content> <[tag tag tag]> title) - Title is not mandatory',
 									     quote => 'Tumblr quote post: (quote <content> <[source]>)',
-									     photo => 'Tumblr photo post: (photo <img url> <[tag tag tag]> title) - Supported formats: jpeg,jpg,png,bmp,gif,webp,svg. Title is not mandatory',
+									     photo => 'Tumblr photo post: (photo <img url> <[tag tag tag]> title) - Supported formats: jpeg,jpg,png,gif. Title is not mandatory',
 									     link => 'Tumblr link post: (link <url> <[tag tag tag]> <title>) - Title is mandatory',
 									     video => 'Tumblr video post: (video <embed> <[tag tag tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
 									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
-									     reblog => 'Tumblr post reblog: (reblog <id>) -- "id" is a specific post ID',
+									     reblog => 'Tumblr post reblog: (reblog <id> <[tag tag tag]>) -- "id" is a specific post ID',
 									     version => 'Shows our version and info',
 									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
@@ -487,7 +487,7 @@ sub irc_botcmd_photo {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m,^(https?:\/\/.+\.(?i)(jpeg|jpg|png|bmp|gif|webp|svg))\s+\[(.+)\](.+)?$,) {
+  if ($what =~ m,^(https?:\/\/.+\.(?i)(jpeg|jpg|png|gif))\s+\[(.+)\](.+)?$,) {
 
     my $title;
     my $source = trim($1);
@@ -717,10 +717,13 @@ sub irc_botcmd_reblog {
   my $nick = parse_user($who);                                         
   return unless is_where_a_channel($channel);                          
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^\s*(\d+)\s*$/) {
+  if ($what =~ m/^\s*(\d+)\s+\[(.+)\]\s*$/) {
     my $id = trim($1);
-    utf8::decode($id);
+    my $tags = trim($2);
+    $tags =~ s/\s+/,/g;
 
+    utf8::decode($id);
+    utf8::decode($tags);
     $retrieveurl .= "\/\?api_key\=$c_key\&id\=$id";
 
     my $ua = LWP::UserAgent->new;
@@ -738,7 +741,8 @@ sub irc_botcmd_reblog {
            nonce => rand(1000000),                       
            extra_params => {               
                             'id' => "$id",
-                            'reblog_key' => "$reblog_key"
+                            'reblog_key' => "$reblog_key",
+			    'tags' => "$tags"
                            });                           
 	
 	bot_says($channel, reblog($request));
