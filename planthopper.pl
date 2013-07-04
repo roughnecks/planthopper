@@ -104,6 +104,7 @@ my $posturl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post';
 my $delurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post/delete';
 my $retrieveurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/posts';
 my $reblogurl = 'http://api.tumblr.com/v2/blog/' . $tumblelog . '/post/reblog';
+my $likeurl = 'http://api.tumblr.com/v2/user/like';
 
 warn_and_quit() unless ($token && $secret && $tumblelog);
 
@@ -160,6 +161,7 @@ POE::Session->create(
 						     irc_botcmd_audio
 						     irc_botcmd_delete
 						     irc_botcmd_reblog
+						     irc_botcmd_like
 						     irc_botcmd_git
 						     irc_botcmd_restart
 						     irc_botcmd_version
@@ -186,6 +188,7 @@ sub _start {
 									     audio => 'Tumblr audio post: (audio <external url> <[tag tag tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
 									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
 									     reblog => 'Tumblr post reblog: (reblog <id> <[tag tag tag]>) -- "id" is a specific post ID',
+									     like => 'Tumblr post like: (like <id>) -- "id" is a specific post ID',
 									     version => 'Shows our version and info',
 									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
@@ -751,6 +754,41 @@ sub irc_botcmd_reblog {
   } else { bot_says($channel, "Invalid format: try help reblog."); }
 }
 
+sub irc_botcmd_like {
+  my ($who, $channel, $what) = @_[ARG0..$#_];                          
+  my $nick = parse_user($who);                                         
+  return unless is_where_a_channel($channel);                          
+  return unless (check_if_op($channel, $nick) || check_if_admin($who));
+  if ($what =~ m/^\s*(\d+)\s*$/) {
+    my $id = trim($1);
+
+    utf8::decode($id);
+    $retrieveurl .= "\/\?api_key\=$c_key\&id\=$id";
+
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->get( $retrieveurl );
+    if ( $response->is_success ) {  
+      my $r = decode_json($response->content);
+      if($r->{'meta'}{'status'} == 200) {
+	my $reblog_key = $r->{'response'}{'posts'}[0]{'reblog_key'};
+	print "Our key is: $reblog_key\n";
+
+	my $request = Net::OAuth->request("protected resource")->new     
+          (request_url => $likeurl,                      
+           %oauth_api_params,                            
+           timestamp => time(),                          
+           nonce => rand(1000000),                       
+           extra_params => {               
+                            'id' => "$id",
+                            'reblog_key' => "$reblog_key",
+                           });                           
+	
+	bot_says($channel, like($request));
+      } else { printf("Bad meta status: %s\n", $r->{'meta'}{'msg'}); }
+    } else { print "Bad response from LWP\n"; }
+  } else { bot_says($channel, "Invalid format: try help like."); }
+}
+
 sub post {
   my $request = shift;
   $request->sign;
@@ -812,7 +850,31 @@ sub reblog {
     if($r->{'meta'}{'status'} == 201) {
       my $item_id = $r->{'response'}{'id'};
       print("Successfully reblogged entry\n");
-      return "Content reblogged to tumblelog. http:\/\/$tumblelog\/$item_id";
+      return "Content reblogged to tumblelog. http:\/\/$tumblelog\/post\/$item_id";
+    } else {
+      printf("We failed: %s\n",
+	     $r->{'meta'}{'msg'});
+      return "We failed. Check logs";
+    }            
+  } else {
+    printf("We failed: %s\n",
+	   $response->as_string);
+    return "We failed. Check logs";
+  }
+}
+
+sub like {
+  my $request = shift;
+  $request->sign;
+  
+  my $ua = LWP::UserAgent->new;
+  my $response = $ua->request(POST $likeurl, Content => $request->to_post_body);
+  
+  if ( $response->is_success ) {
+    my $r = decode_json($response->content);
+    if($r->{'meta'}{'status'} == 200) {
+      print("Liked a Tumblr entry\n");
+      return "Content liked from tumblelog.";
     } else {
       printf("We failed: %s\n",
 	     $r->{'meta'}{'msg'});
