@@ -36,7 +36,7 @@ use Net::OAuth;
 $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
 use JSON;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2.1';
 
 my $lastpinged;
 my $reconnect_delay = 80;
