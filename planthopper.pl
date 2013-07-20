@@ -417,18 +417,18 @@ sub irc_botcmd_text {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(.+)\s+\[(.+)\](.+)?$/) {
+  if ($what =~ m/^(.+)\s+\[(.+,?)+\](.+)?$/) {
     
     my $title;
     my $string = $1;
-    my $tags = trim($2);
+    my $tagsblob = $2;
     $title = trim($3) if ($3);
-    $tags =~ s/\s+/,/g;
-
-    print Dumper($string);
-    print Dumper($tags);
-    print Dumper($title);
-
+    my $tags = tag_sanitize($tagsblob);
+    
+    #print Dumper($string);
+    #print Dumper($tags);
+    #print Dumper($title);
+    
     utf8::decode($string);
     utf8::decode($tags);
     utf8::decode($title);
@@ -461,8 +461,8 @@ sub irc_botcmd_quote {
     my $string = trim($1);
     my $source = trim($2);
 
-    print Dumper($string);
-    print Dumper($source);
+    #print Dumper($string);
+    #print Dumper($source);
 
     utf8::decode($string);
     utf8::decode($source);
@@ -490,17 +490,17 @@ sub irc_botcmd_photo {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m,^(https?:\/\/.+\.(?i)(jpeg|jpg|png|gif))\s+\[(.+)\](.+)?$,) {
+  if ($what =~ m/^(https?:\/\/.+\.(?i)(jpeg|jpg|png|gif))\s+\[(.+,?)+\](.+)?$/) {
 
     my $title;
     my $source = trim($1);
-    my $tags = trim($3);
+    my $tagsblob = $3;
     $title = trim($4) if ($4);
-    $tags =~ s/\s+/,/g;
+    my $tags = tag_sanitize($tagsblob);
 
-    print Dumper($source);
-    print Dumper($tags);
-    print Dumper($title);
+    #print Dumper($source);
+    #print Dumper($tags);
+    #print Dumper($title);
 
     utf8::decode($source);
     utf8::decode($tags);
@@ -531,16 +531,17 @@ sub irc_botcmd_link {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(https?:\/\/.+)\s+\[(.+)\](.+)$/) {
+  if ($what =~ m/^(https?:\/\/.+)\s+\[(.+,?)+\](.+)$/) {
     
     my $link = $1;
-    my $tags = trim($2);
+    my $tagsblob = $2;
     my $title = trim($3);
-    $tags =~ s/\s+/,/g;
+    my $tags = tag_sanitize($tagsblob);
 
-    print Dumper($link);
-    print Dumper($tags);
-    print Dumper($title);
+
+    #print Dumper($link);
+    #print Dumper($tags);
+    #print Dumper($title);
 
     utf8::decode($link);
     utf8::decode($tags);
@@ -571,17 +572,18 @@ sub irc_botcmd_video {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(.+)\s+\[(.+)\](.+)?$/) {
+  if ($what =~ m/^(.+)\s+\[(.+,?)+\](.+)?$/) {
 
     my $title;
     my $embed = trim($1);
-    my $tags = trim($2);
+    my $tagsblob = $2;
     $title = trim($3) if ($3);
-    $tags =~ s/\s+/,/g;
+    my $tags = tag_sanitize($tagsblob);
 
-    print Dumper($embed);
-    print Dumper($tags);
-    print Dumper($title);
+
+    #print Dumper($embed);
+    #print Dumper($tags);
+    #print Dumper($title);
 
     utf8::decode($embed);
     utf8::decode($tags);
@@ -614,18 +616,18 @@ sub irc_botcmd_chat {
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
   if ($what =~ m/^(\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{1,15}\>\s+.+\s*\--\s*\<[a-z_\-\[\]\\^{}|`][a-z0-9_\-\[\]\\^{}|`]{1,15}\>\s+.+)+\s*$/i) {
 
-    print Dumper(\$1);
+    #print Dumper(\$1);
     my $string = $1;
     my @chat;
     my @blob = split(/--/, $string);
-    print Dumper(\@blob);
+    #print Dumper(\@blob);
     foreach my $message(@blob) {
       next if $message =~ m/^\s*$/;
       $message = trim($message);
       push @chat, $message;
     }
     my $chat = join("\n", @chat);
-    print Dumper(\$chat);
+    #print Dumper(\$chat);
 
     utf8::decode($chat);
     my $request =
@@ -651,17 +653,17 @@ sub irc_botcmd_audio {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(https?:\/\/.+\.mp3)\s+\[(.+)\](.+)?$/) {
+  if ($what =~ m/^(https?:\/\/.+\.mp3)\s+\[(.+,?)+\](.+)?$/) {
 
     my $title;
     my $ext_url = trim($1);
-    my $tags = trim($2);
+    my $tagsblob = $2;
     $title = trim($3) if ($3);
-    $tags =~ s/\s+/,/g;
+    my $tags = tag_sanitize($tagsblob);
 
-    print Dumper($ext_url);
-    print Dumper($tags);
-    print Dumper($title);
+    #print Dumper($ext_url);
+    #print Dumper($tags);
+    #print Dumper($title);
 
     utf8::decode($ext_url);
     utf8::decode($tags);
@@ -722,8 +724,8 @@ sub irc_botcmd_reblog {
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
   if ($what =~ m/^\s*(\d+)\s+\[(.+)\]\s*$/) {
     my $id = trim($1);
-    my $tags = trim($2);
-    $tags =~ s/\s+/,/g;
+    my $tagsblob = $2;
+    my $tags = tag_sanitize($tagsblob);
 
     utf8::decode($id);
     utf8::decode($tags);
@@ -901,6 +903,20 @@ sub ltrim {
   my $string = shift;
   $string =~ s/^\s+//;
   return $string;
+}
+
+sub tag_sanitize {
+  my $bad = shift;
+  $bad =~ s/^\s*,//;
+  $bad =~ s/,\s*$//;
+  my @tags;
+  my @tagsblob = split(',', $bad);
+  foreach my $element (@tagsblob) {
+    next if $element =~ m/^\s*$/;
+    $element = trim($element);
+    push @tags, $element;
+  }
+  return join(',', @tags);
 }
 
 sub irc_botcmd_version {
