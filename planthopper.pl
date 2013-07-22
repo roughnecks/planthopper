@@ -424,11 +424,11 @@ sub irc_botcmd_text {
     my $tagsblob = $2;
     $title = trim($3) if ($3);
     my $tags = tag_sanitize($tagsblob);
-    
+
     #print Dumper($string);
     #print Dumper($tags);
     #print Dumper($title);
-    
+
     utf8::decode($string);
     utf8::decode($tags);
     utf8::decode($title);
@@ -907,8 +907,6 @@ sub ltrim {
 
 sub tag_sanitize {
   my $bad = shift;
-  $bad =~ s/^\s*,//;
-  $bad =~ s/,\s*$//;
   my @tags;
   my @tagsblob = split(',', $bad);
   foreach my $element (@tagsblob) {
