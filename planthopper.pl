@@ -876,7 +876,7 @@ sub like {
     my $r = decode_json($response->content);
     if($r->{'meta'}{'status'} == 200) {
       print("Liked a Tumblr entry\n");
-      return "Content liked from tumblelog.";
+      return "Content liked in tumblelog.";
     } else {
       printf("We failed: %s\n",
 	     $r->{'meta'}{'msg'});
