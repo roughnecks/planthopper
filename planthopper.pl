@@ -657,7 +657,7 @@ sub irc_botcmd_audio {
   my $nick = parse_user($who);
   return unless is_where_a_channel($channel);
   return unless (check_if_op($channel, $nick) || check_if_admin($who));
-  if ($what =~ m/^(https?:\/\/.+\.mp3)\s+\[(.+,?)+\](.+)?$/) {
+  if ($what =~ m/^(https?:\/\/.+)\s+\[(.+,?)+\](.+)?$/) {
 
     my $title;
     my $ext_url = trim($1);
