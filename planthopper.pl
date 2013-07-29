@@ -179,13 +179,13 @@ sub _start {
 		   POE::Component::IRC::Plugin::BotCommand->new(
 								Commands => {		    
 									     restart => 'Restart planthopper',
-									     text => 'Tumblr text post: (text <content> <[tag, tag, tag]> title) - Title is not mandatory',
+									     text => 'Tumblr text post: (text <content> <[tag, tag, tag]> title) - Title is not mandatory. We can use HTML in content and title',
 									     quote => 'Tumblr quote post: (quote <content> <[source]>)',
-									     photo => 'Tumblr photo post: (photo <img url> <[tag, tag, tag]> title) - Supported formats: jpeg,jpg,png,gif. Title is not mandatory',
+									     photo => 'Tumblr photo post: (photo <img url> <[tag, tag, tag]> title) - Supported formats: jpeg,jpg,png,gif. Title is not mandatory and it may contain HTML',
 									     link => 'Tumblr link post: (link <url> <[tag, tag, tag]> <title>) - Title is mandatory',
-									     video => 'Tumblr video post: (video <embed> <[tag, tag, tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory',
+									     video => 'Tumblr video post: (video <embed> <[tag, tag, tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory and it may contain HTML',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
-									     audio => 'Tumblr audio post: (audio <external url> <[tag, tag, tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory',
+									     audio => 'Tumblr audio post: (audio <external url> <[tag, tag, tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory and it may contain HTML',
 									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
 									     reblog => 'Tumblr post reblog: (reblog <id> <[tag, tag, tag]>) -- "id" is a specific post ID',
 									     like => 'Tumblr post like: (like <id>) -- "id" is a specific post ID',
@@ -430,8 +430,10 @@ sub irc_botcmd_text {
     #print Dumper($title);
 
     utf8::decode($string);
+    decode_entities($string);
     utf8::decode($tags);
     utf8::decode($title);
+    decode_entities($title);
     my $request =
       Net::OAuth->request("protected resource")->new
 	  (request_url => $posturl,
@@ -505,6 +507,7 @@ sub irc_botcmd_photo {
     utf8::decode($source);
     utf8::decode($tags);
     utf8::decode($title);
+    decode_entities($title);
 
     my $request =
       Net::OAuth->request("protected resource")->new
@@ -588,6 +591,7 @@ sub irc_botcmd_video {
     utf8::decode($embed);
     utf8::decode($tags);
     utf8::decode($title);
+    decode_entities($title);
 
     my $request =
       Net::OAuth->request("protected resource")->new
@@ -668,6 +672,7 @@ sub irc_botcmd_audio {
     utf8::decode($ext_url);
     utf8::decode($tags);
     utf8::decode($title);
+    decode_entities($title);
 
     my $request =
       Net::OAuth->request("protected resource")->new
