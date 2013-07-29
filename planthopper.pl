@@ -185,7 +185,7 @@ sub _start {
 									     link => 'Tumblr link post: (link <url> <[tag, tag, tag]> <title>) - Title is mandatory',
 									     video => 'Tumblr video post: (video <embed> <[tag, tag, tag]> title) - "embed" is HTML embed code for the video or direct link to it. Title is not mandatory and it may contain HTML',
 									     chat => 'Tumblr chat post: (chat <nick1> text -- <nick2> text -- <nick1> ..) - Each chat line takes an IRC nick prefixed by "<" and suffixed by ">" and then the actual message; "--" is used as separator between each chat line and we can have as many chat lines as they fill in an IRC message.',
-									     audio => 'Tumblr audio post: (audio <external url> <[tag, tag, tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr) and we only accept mp3. Title is not mandatory and it may contain HTML',
+									     audio => 'Tumblr audio post: (audio <external url> <[tag, tag, tag]> title) - "External url" is the URL of the site that hosts the audio file (not tumblr). Title is not mandatory and it may contain HTML',
 									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
 									     reblog => 'Tumblr post reblog: (reblog <id> <[tag, tag, tag]>) -- "id" is a specific post ID',
 									     like => 'Tumblr post like: (like <id>) -- "id" is a specific post ID',
