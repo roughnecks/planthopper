@@ -1,6 +1,16 @@
 planthopper
 ===========
 
+DISCONTINUED
+============
+
+08 April 2014
+
+DynDns is terminating its free dns services, so my website will be offline in some
+days and you won't be able to authenticate the app anymore.
+
+Sorry.
+
 planthopper is a Perl IRC Application which can be used to post content over a Tumblr
 log directly from your IRC client.
 
