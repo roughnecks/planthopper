@@ -164,6 +164,7 @@ POE::Session->create(
 						     irc_botcmd_like
 						     irc_botcmd_git
 						     irc_botcmd_restart
+						     irc_botcmd_tumblelog
 						     irc_botcmd_version
 						     greetings_and_die
 						     ping_check
@@ -189,6 +190,7 @@ sub _start {
 									     delete => 'Tumblr post deletion: (delete <id>) -- "id" is a specific post ID',
 									     reblog => 'Tumblr post reblog: (reblog <id> <[tag, tag, tag]>) -- "id" is a specific post ID',
 									     like => 'Tumblr post like: (like <id>) -- "id" is a specific post ID',
+									     tumblelog => 'Our tumblelog link.',
 									     version => 'Shows our version and info',
 									     git =>'(git <pull|version>) -- Pull updates from planthopper Git Repository or show Git Version.'
 									    },
@@ -794,6 +796,11 @@ sub irc_botcmd_like {
       } else { printf("Bad meta status: %s\n", $r->{'meta'}{'msg'}); }
     } else { print "Bad response from LWP\n"; }
   } else { bot_says($channel, "Invalid format: try help like."); }
+}
+
+sub irc_botcmd_tumblelog {
+  my ($who, $channel) = @_[ARG0, ARG1];
+  bot_says($channel, 'http://' . "$tumblelog");
 }
 
 sub post {
