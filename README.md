@@ -23,7 +23,7 @@ If you want to try planthopper, you need to authorize it as an application for y
 tumblelog. Once the app has been authorized you'll have to edit the bot configuration 
 file and fill in some informations, which should be kept privately.
 
-First of all connect with your browser to <removed>
+First of all connect with your browser to //removed//
 You'll have to trust my self-signed cert: i fear there's no other simple way to go.
 My server will redirect you to the Tumblr website where you can authenticate yourself
 with your email address and password: if the authentication process succeeds, Tumbler
